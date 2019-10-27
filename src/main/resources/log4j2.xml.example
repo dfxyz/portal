@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="console">
+            <PatternLayout pattern="%d %5p - %msg%n"/>
+        </Console>
+        <RollingFile name="rollingFile" fileName="portal.log" filePattern="portal.log.%i">
+            <PatternLayout pattern="%d %5p - %msg%n"/>
+            <DefaultRolloverStrategy max="1"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="1MB"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="dfxyz.portal" level="info" additivity="false">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="rollingFile"/>
+        </Logger>
+    </Loggers>
+</Configuration>
