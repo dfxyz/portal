@@ -112,10 +112,6 @@ private fun initHttpServer(properties: Properties) {
     val port = properties.getInt(PK_PORT)
     vertxInstance.createHttpServer(httpServerOptionsOf(host = host, port = port))
         .requestHandler(::handleRequest)
-        .exceptionHandler {
-            logger.error("failed to create http server")
-            recordException(it)
-        }
         .listen {
             if (it.failed()) {
                 logger.error("failed to listen at $host:$port")
