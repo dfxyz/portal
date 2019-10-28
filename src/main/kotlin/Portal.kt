@@ -49,6 +49,7 @@ private const val PORTAL_HTTP_METHOD = "PORTAL"
 private const val PORTAL_HTTP_HEADER_METHOD = "x-portal-method"
 private const val PORTAL_HTTP_HEADER_URI = "x-portal-uri"
 private const val PORTAL_HTTP_HEADER_AUTH = "x-portal-authenticate"
+private const val PORTAL_HTTP_HEADER_REAL_IP = "x-portal-real-ip"
 private const val PORTAL_200_OK = "HTTP/1.1 200 OK\r\n\r\n"
 
 private enum class ProxyMode { RULE, DIRECT, RELAY }
@@ -766,7 +767,7 @@ private fun Properties.getInt(key: String): Int {
 
 
 private fun HttpServerRequest.toLogString(): String {
-    val host = this.getHeader("x-real-ip") ?: this.remoteAddress().host()
+    val host = this.getHeader(PORTAL_HTTP_HEADER_REAL_IP) ?: this.remoteAddress().host()
     val originalMethod = this.rawMethod()
     val method: String
     val uri: String
