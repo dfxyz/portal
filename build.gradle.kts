@@ -31,6 +31,7 @@ tasks.register<JavaExec>("start") {
     group = "application"
     workingDir = projectDir
     classpath = sourceSets["main"].runtimeClasspath
+    jvmArgs = listOf("-Dlog4j.configurationFile=log4j2.xml")
     main = launcherClass
     args = listOf("start", verticleClass, "-id", verticleId)
 }
