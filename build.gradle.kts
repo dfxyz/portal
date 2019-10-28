@@ -25,7 +25,7 @@ tasks.withType<KotlinCompile> {
 
 val launcherClass = "io.vertx.core.Launcher"
 val verticleClass = "dfxyz.portal.Portal"
-val verticleId = "$group:${rootProject.name}"
+val verticleId = "$group:${project.name}"
 
 tasks.register<JavaExec>("start") {
     group = "application"
