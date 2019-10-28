@@ -1,7 +1,7 @@
 .idea/
 .gradle/
 build/
-src/main/resources/log4j2.xml
+log4j2.xml
 portal.properties
 portal.mode
 portal.log

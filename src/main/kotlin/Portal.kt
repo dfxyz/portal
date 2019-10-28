@@ -3,6 +3,7 @@ package dfxyz.portal
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
+import io.vertx.core.Launcher
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.*
@@ -14,12 +15,15 @@ import io.vertx.kotlin.core.http.httpServerOptionsOf
 import io.vertx.kotlin.core.net.netClientOptionsOf
 import io.vertx.kotlin.core.net.proxyOptionsOf
 import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import java.io.File
 import java.net.InetAddress
 import java.net.URI
 import java.net.URL
 import java.nio.charset.Charset
 import java.util.*
+
+private const val VERTICLE_ID = "dfxyz:portal"
 
 private const val PROPERTIES_FILENAME = "portal.properties"
 private const val MODE_FILENAME = "portal.mode"
@@ -58,7 +62,7 @@ private enum class RelayType { PORTAL, PROXY }
 
 private val ignoredHeaderPrefixes = listOf("proxy-", "x-portal-")
 
-private val logger = LogManager.getLogger(Portal::class.java.packageName)
+private lateinit var logger: Logger
 
 private lateinit var vertxInstance: Vertx
 
@@ -74,9 +78,30 @@ private lateinit var proxyRelayHandler: RelayHandler
 private var relayEnabled = false
 private lateinit var relayAuthenticate: String
 
+fun main(args: Array<String>) {
+    when (args.getOrNull(0)) {
+        "start" -> Launcher.main(
+            arrayOf(
+                "start", Portal::class.java.name,
+                "-id", VERTICLE_ID,
+                "--java-opts=-Dlog4j.configurationFile=log4j2.xml"
+            )
+        )
+
+        "stop" -> Launcher.main(arrayOf("stop", VERTICLE_ID))
+
+        "list" -> Launcher.main(arrayOf("list"))
+
+        else -> {
+            System.setProperty("log4j.configurationFile", "log4j2.xml")
+            Launcher.main(arrayOf("run", Portal::class.java.name))
+        }
+    }
+}
 
 class Portal : AbstractVerticle() {
     override fun start() {
+        logger = LogManager.getLogger(this::class.java.packageName)
         vertxInstance = vertx
         initialize()
     }

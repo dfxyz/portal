@@ -1,11 +1,16 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    application
     kotlin("jvm") version "1.3.50"
 }
 
 group = "dfxyz"
 version = "0.1"
+
+application {
+    mainClassName = "dfxyz.portal.PortalKt"
+}
 
 repositories {
     mavenCentral()
@@ -21,31 +26,4 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
-}
-
-val launcherClass = "io.vertx.core.Launcher"
-val verticleClass = "dfxyz.portal.Portal"
-val verticleId = "$group:${project.name}"
-
-tasks.register<JavaExec>("start") {
-    group = "application"
-    workingDir = projectDir
-    classpath = sourceSets["main"].runtimeClasspath
-    jvmArgs = listOf("-Dlog4j.configurationFile=log4j2.xml")
-    main = launcherClass
-    args = listOf("start", verticleClass, "-id", verticleId)
-}
-
-tasks.register<JavaExec>("stop") {
-    group = "application"
-    classpath = sourceSets["main"].runtimeClasspath
-    main = launcherClass
-    args = listOf("stop", verticleId)
-}
-
-tasks.register<JavaExec>("status") {
-    group = "application"
-    classpath = sourceSets["main"].runtimeClasspath
-    main = launcherClass
-    args = listOf("list")
 }
