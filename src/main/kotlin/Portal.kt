@@ -15,6 +15,7 @@ import io.vertx.kotlin.core.net.netClientOptionsOf
 import io.vertx.kotlin.core.net.proxyOptionsOf
 import org.apache.logging.log4j.LogManager
 import java.io.File
+import java.net.InetAddress
 import java.net.URI
 import java.net.URL
 import java.nio.charset.Charset
@@ -49,8 +50,6 @@ private const val PORTAL_HTTP_HEADER_METHOD = "x-portal-method"
 private const val PORTAL_HTTP_HEADER_URI = "x-portal-uri"
 private const val PORTAL_HTTP_HEADER_AUTH = "x-portal-authenticate"
 private const val PORTAL_200_OK = "HTTP/1.1 200 OK\r\n\r\n"
-
-private const val LOCAL_HOST = "127.0.0.1"
 
 private enum class ProxyMode { RULE, DIRECT, RELAY }
 
@@ -214,7 +213,7 @@ private fun handleRequest(request: HttpServerRequest) {
 
 
 private fun handleGetRequest(request: HttpServerRequest) {
-    if (!proxyEnabled || request.remoteAddress().host() != LOCAL_HOST) {
+    if (!proxyEnabled || !isLoopbackAddress(request.remoteAddress().host())) {
         request.response().setStatus(HttpResponseStatus.NOT_FOUND).endAndClose()
         recordDeniedAccess(request)
         return
@@ -306,6 +305,14 @@ private fun handleGetRequest(request: HttpServerRequest) {
     }
 }
 
+private fun isLoopbackAddress(host: String): Boolean {
+    return try {
+        InetAddress.getByName(host).isLoopbackAddress
+    } catch (e: Exception) {
+        false
+    }
+}
+
 private fun changeProxyMode(request: HttpServerRequest, mode: ProxyMode) {
     val modeName = mode.name
     if (proxyMode != mode) {
@@ -373,6 +380,13 @@ private fun proxyConnectRequest(request: HttpServerRequest, asRelay: Boolean) {
         return
     }
 
+    if (asRelay && isLoopbackAddress(uri.host)) {
+        val status = HttpResponseStatus.BAD_GATEWAY
+        request.response().setStatus(status).endAndClose()
+        recordDeniedAccess(request)
+        return
+    }
+
     vertxInstance.createNetClient().connect(uri.port, uri.host) { onProxyRequestConnected(request, it, asRelay) }
 
     if (asRelay) {
@@ -423,6 +437,13 @@ private fun proxyNonConnectRequest(request: HttpServerRequest, asRelay: Boolean)
     if (!asRelay && !canProxyDirectly(url.host)) {
         proxyRelayHandler.relayNonConnectRequest(request)
         recordRelayedAccess(request)
+        return
+    }
+
+    if (asRelay && isLoopbackAddress(url.host)) {
+        val status = HttpResponseStatus.BAD_GATEWAY
+        request.response().setStatus(status).endAndClose()
+        recordDeniedAccess(request)
         return
     }
 
