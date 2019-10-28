@@ -1,8 +1,8 @@
 #portal.host=localhost
 #portal.port=4200
+#portal.clientPoolSize=8
 
 #portal.proxy.enable=true
-#portal.proxy.clientPoolSize=8
 #portal.proxy.externalRule.url=https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt
 #portal.proxy.externalRule.base64Encoded=true
 

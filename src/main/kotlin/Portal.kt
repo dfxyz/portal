@@ -32,8 +32,8 @@ private const val EXTERNAL_RULE_FILENAME = "portal.rules.external"
 
 private const val PK_HOST = "portal.host"
 private const val PK_PORT = "portal.port"
+private const val PK_CLIENT_POOL_SIZE = "portal.clientPoolSize"
 private const val PK_PROXY_ENABLE = "portal.proxy.enable"
-private const val PK_PROXY_CLIENT_POOL_SIZE = "portal.proxy.clientPoolSize"
 private const val PK_PROXY_EXTERNAL_RULE_URL = "portal.proxy.externalRule.url"
 private const val PK_PROXY_EXTERNAL_RULE_BASE64_ENCODED = "portal.proxy.externalRule.base64Encoded"
 private const val PK_PROXY_RELAY_TYPE = "portal.proxy.relay.type"
@@ -66,11 +66,12 @@ private lateinit var logger: Logger
 
 private lateinit var vertxInstance: Vertx
 
+private lateinit var httpClient: HttpClient
+
 private var proxyEnabled = true
 private var proxyMode = ProxyMode.RULE
 private lateinit var proxyLocalRuleSet: HostRuleSet
 private lateinit var proxyExternalRuleSet: HostRuleSet
-private lateinit var proxyHttpClient: HttpClient
 private lateinit var proxyExternalRuleUrl: String
 private var proxyExternalRuleBase64Encoded = true
 private lateinit var proxyRelayHandler: RelayHandler
@@ -122,7 +123,7 @@ private fun initialize() {
         return
     }
     try {
-        initHttpServer(properties)
+        initHttpServerAndClient(properties)
         initProxyFunction(properties)
         initRelayFunction(properties)
     } catch (e: Exception) {
@@ -132,7 +133,7 @@ private fun initialize() {
     }
 }
 
-private fun initHttpServer(properties: Properties) {
+private fun initHttpServerAndClient(properties: Properties) {
     val host = properties.getString(PK_HOST)
     val port = properties.getInt(PK_PORT)
     vertxInstance.createHttpServer(httpServerOptionsOf(host = host, port = port))
@@ -145,6 +146,13 @@ private fun initHttpServer(properties: Properties) {
                 logger.info("listening at $host:$port")
             }
         }
+
+    val clientOptions = httpClientOptionsOf()
+    val clientPoolSize = properties.getOptionalString(PK_CLIENT_POOL_SIZE)?.toIntOrNull()
+    if (clientPoolSize != null) {
+        clientOptions.maxPoolSize = clientPoolSize
+    }
+    httpClient = vertxInstance.createHttpClient(clientOptions)
 }
 
 private fun initProxyFunction(properties: Properties) {
@@ -156,13 +164,6 @@ private fun initProxyFunction(properties: Properties) {
     loadPreviousProxyMode()
     loadProxyRules(LOCAL_RULE_FILENAME, HostRuleSet().also { proxyLocalRuleSet = it })
     loadProxyRules(EXTERNAL_RULE_FILENAME, HostRuleSet().also { proxyExternalRuleSet = it })
-
-    val clientOptions = httpClientOptionsOf()
-    val clientPoolSize = properties.getOptionalString(PK_PROXY_CLIENT_POOL_SIZE)?.toIntOrNull()
-    if (clientPoolSize != null) {
-        clientOptions.maxPoolSize = clientPoolSize
-    }
-    proxyHttpClient = vertxInstance.createHttpClient(clientOptions)
 
     proxyExternalRuleUrl = properties.getOptionalString(PK_PROXY_EXTERNAL_RULE_URL) ?: ""
     properties.getOptionalString(PK_PROXY_EXTERNAL_RULE_BASE64_ENCODED)?.toBoolean()?.also {
@@ -271,7 +272,7 @@ private fun handleGetRequest(request: HttpServerRequest) {
                 return
             }
             @Suppress("DEPRECATION")
-            proxyHttpClient.getAbs(proxyExternalRuleUrl)
+            httpClient.getAbs(proxyExternalRuleUrl)
                 .exceptionHandler {
                     request.response().end("exception caught on sending request\n")
                     logger.error("failed to update external rules")
@@ -470,7 +471,7 @@ private fun proxyNonConnectRequest(request: HttpServerRequest, asRelay: Boolean)
     }
 
     @Suppress("DEPRECATION")
-    val proxyRequest = proxyHttpClient.requestAbs(requestMethod, requestUri)
+    val proxyRequest = httpClient.requestAbs(requestMethod, requestUri)
         .exceptionHandler { onProxyRequestException(request, it) }
         .handler { onProxyRequestResponded(request, it) }
     copyHeaders(proxyRequest, request)
