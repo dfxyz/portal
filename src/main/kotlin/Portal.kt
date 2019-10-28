@@ -240,12 +240,12 @@ private fun handleGetRequest(request: HttpServerRequest) {
                     vertxInstance.fileSystem().createFile(LOCAL_RULE_FILENAME, null)
                     logger.info("local rules not exist, an empty file has been created")
                 }
-                request.response().end("OK\n")
+                request.response().end("localRuleNumber=${proxyLocalRuleSet.size}\n")
             }
         }
         "/updateExternalRules" -> {
             if (proxyExternalRuleUrl.isEmpty()) {
-                request.response().end("property not set\n")
+                request.response().end("property '$PK_PROXY_EXTERNAL_RULE_URL' not set\n")
                 return
             }
             @Suppress("DEPRECATION")
@@ -277,7 +277,7 @@ private fun handleGetRequest(request: HttpServerRequest) {
                                 vertxInstance.fileSystem()
                                     .writeFile(EXTERNAL_RULE_FILENAME, Buffer.buffer(rawBytes), null)
                                 proxyExternalRuleSet.load(rawBytes.toString(Charset.defaultCharset()))
-                                request.response().end("OK\n")
+                                request.response().end("externalRuleNumber=${proxyExternalRuleSet.size}\n")
                                 logger.info("external rules updated")
                             } catch (e: Exception) {
                                 request.response().end("exception caught on handling response\n")
