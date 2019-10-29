@@ -693,6 +693,8 @@ private class PortalRelayHandler(properties: Properties) : RelayHandler {
 
     private fun copyPortalHeaders(proxyRequest: HttpClientRequest, request: HttpServerRequest) {
         proxyRequest
+            .putHeader("upgrade", "portal")
+            .putHeader("connection", "upgrade")
             .putHeader(PORTAL_HTTP_HEADER_METHOD, request.rawMethod())
             .putHeader(PORTAL_HTTP_HEADER_URI, request.uri())
             .putHeader(PORTAL_HTTP_HEADER_AUTH, authenticate)
