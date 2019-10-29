@@ -27,3 +27,17 @@ dependencies {
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
+
+tasks.getByName<Sync>("installDist").apply {
+    doLast {
+        for (dir in listOf("bin", "lib")) {
+            sync {
+                from("$destinationDir/$dir")
+                into("$projectDir/$dir")
+            }
+        }
+        for (dir in listOf("install", "libs", "scripts", "tmp")) {
+            delete("$buildDir/$dir")
+        }
+    }
+}

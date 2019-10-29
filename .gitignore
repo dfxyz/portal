@@ -1,6 +1,8 @@
 .idea/
 .gradle/
 build/
+bin/
+lib/
 log4j2.xml
 portal.properties
 portal.mode
