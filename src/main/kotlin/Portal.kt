@@ -54,7 +54,7 @@ private const val PORTAL_HTTP_HEADER_METHOD = "x-portal-method"
 private const val PORTAL_HTTP_HEADER_URI = "x-portal-uri"
 private const val PORTAL_HTTP_HEADER_AUTH = "x-portal-authenticate"
 private const val PORTAL_HTTP_HEADER_REAL_IP = "x-portal-real-ip"
-private const val PORTAL_200_OK = "HTTP/1.1 200 OK\r\n\r\n"
+private const val PORTAL_CONNECTED_RESPONSE = "HTTP/1.1 101 OK\r\n\r\n"
 
 private enum class ProxyMode { RULE, DIRECT, RELAY }
 
@@ -433,7 +433,7 @@ private fun onProxyRequestConnected(
 
     val sourceSocket = request.netSocket()
     if (writeOkResponse) {
-        sourceSocket.write(PORTAL_200_OK)
+        sourceSocket.write(PORTAL_CONNECTED_RESPONSE)
     }
     val targetSocket = asyncResult.result()
 
@@ -706,7 +706,7 @@ private class PortalRelayHandler(properties: Properties) : RelayHandler {
             .exceptionHandler { onProxyRequestException(request, it) }
             .handler { proxyResponse ->
                 val statusCode = proxyResponse.statusCode()
-                if (statusCode != HttpResponseStatus.OK.code()) {
+                if (statusCode != HttpResponseStatus.SWITCHING_PROTOCOLS.code()) {
                     request.response().setStatusCode(statusCode).endAndClose()
                     recordFailedAccess(request)
                     return@handler
