@@ -10,6 +10,7 @@ version = "0.1"
 
 application {
     mainClassName = "dfxyz.portal.PortalKt"
+    applicationDefaultJvmArgs = listOf("-Dportal.home=PORTAL_HOME")
 }
 
 repositories {
@@ -26,6 +27,13 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks.getByName<CreateStartScripts>("startScripts") {
+    doLast {
+        unixScript.writeText(unixScript.readText().replace("PORTAL_HOME", "\$APP_HOME"))
+        windowsScript.writeText(windowsScript.readText().replace("PORTAL_HOME", "%APP_HOME%"))
+    }
 }
 
 tasks.getByName<Sync>("installDist").apply {
