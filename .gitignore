@@ -1,5 +1,6 @@
-*/
-portal.*
-!gradle/
-!src/
+.*/
+bin/
+build/
+lib/
+/portal.*
 !*.example
