@@ -1,12 +1,5 @@
-.idea/
-.gradle/
-build/
-bin/
-lib/
-log4j2.xml
-portal.properties
-portal.mode
-portal.log
-portal.log.*
-portal.rules.local
-portal.rules.external
+*/
+portal.*
+!gradle/
+!src/
+!*.example
