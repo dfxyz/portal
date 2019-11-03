@@ -6,10 +6,10 @@ plugins {
 }
 
 group = "dfxyz"
-version = "0.1"
+version = "0.1.1"
 
 application {
-    mainClassName = "dfxyz.portal.PortalKt"
+    mainClassName = "dfxyz.portal.MainKt"
     applicationDefaultJvmArgs = listOf("-Dportal.home=PORTAL_HOME")
 }
 

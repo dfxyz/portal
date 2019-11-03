@@ -1,23 +1,23 @@
-#portal.host=localhost
-#portal.port=4200
-#portal.clientPoolSize=8
+#portal.server.host=localhost
+#portal.server.port=4200
+#portal.client.maxPoolSize=64
 
-#portal.proxy.enable=true
-#portal.proxy.externalRule.url=https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt
-#portal.proxy.externalRule.base64Encoded=true
+#portal.directProxy.enable=true
+#portal.directProxy.remoteRule.b64Encoded=true
+#portal.directProxy.remoteRule.url=url1[,url2,url3,...]
 
-#portal.proxy.relay.type=[portal|proxy]
+#portal.directProxy.relayType=[portal|proxy]
 
-#portal.proxy.relay.portal.url=http://localhost:4200/
-#portal.proxy.relay.portal.authenticate=the-cake-is-a-lie
-#portal.proxy.relay.portal.clientPoolSize=32
+#portal.directProxy.relay.portal.url=https://remotehost/
+#portal.directProxy.relay.portal.auth=the-cake-is-a-lie
+#portal.directProxy.relay.portal.client.maxPoolSize=512
 
-#portal.proxy.relay.proxy.protocol=[http|socks4|socks5]
-#portal.proxy.relay.proxy.host=localhost
-#portal.proxy.relay.proxy.port=1080
-#portal.proxy.relay.proxy.username=
-#portal.proxy.relay.proxy.password=
-#portal.proxy.relay.proxy.clientPoolSize=32
+#portal.directProxy.relay.proxy.protocol=[http|socks4|socks5]
+#portal.directProxy.relay.proxy.host=localhost
+#portal.directProxy.relay.proxy.port=1080
+#portal.directProxy.relay.proxy.username=
+#portal.directProxy.relay.proxy.password=
+#portal.directProxy.relay.proxy.client.maxPoolSize=512
 
-#portal.relay.enable=true
-#portal.relay.authenticate=the-cake-is-a-lie
+#portal.relayedProxy.enable=true
+#portal.relayedProxy.auth=the-cake-is-a-lie
