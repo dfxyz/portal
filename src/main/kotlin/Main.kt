@@ -25,7 +25,6 @@ fun main(args: Array<String>) {
     when (args.getOrNull(0)) {
         "start" -> start()
         "stop" -> stop()
-        "restart" -> restart()
         "list" -> list()
         "run" -> run()
         else -> help()
@@ -72,11 +71,6 @@ private fun stop() {
     Launcher.main(arrayOf("stop", vertxId))
 }
 
-private fun restart() {
-    stop()
-    start()
-}
-
 private fun list() {
     Launcher.main(arrayOf("list"))
 }
@@ -87,11 +81,10 @@ private fun run() {
 
 private fun help() {
     println("Portal - available commands:")
-    println("\t* start")
-    println("\t* stop")
-    println("\t* restart")
-    println("\t* list")
-    println("\t* run")
+    println("  * start")
+    println("  * stop")
+    println("  * list")
+    println("  * run")
 }
 
 class PortalVerticle : AbstractVerticle() {
