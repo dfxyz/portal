@@ -15,8 +15,8 @@ import java.net.URL
 import java.util.*
 
 interface RelayHandler {
-    fun relayConnectRequest(request: HttpServerRequest, uri: String)
-    fun relayNonConnectRequest(request: HttpServerRequest, method: HttpMethod, uri: String)
+    fun relayConnectRequest(request: HttpServerRequest)
+    fun relayNonConnectRequest(request: HttpServerRequest)
 }
 
 private const val PK_RELAY_TYPE = "portal.directProxy.relayType"
@@ -67,7 +67,7 @@ private class RelayByPortal(properties: Properties) : RelayHandler {
             .setPortalAuth(auth)
     }
 
-    override fun relayConnectRequest(request: HttpServerRequest, uri: String) {
+    override fun relayConnectRequest(request: HttpServerRequest) {
         @Suppress("DEPRECATION")
         val relayedRequest = vertx.createHttpClient().requestAbs(HttpMethod.OTHER, url)
             .setRawMethod(PORTAL_RELAYED_REQUEST_METHOD)
@@ -90,9 +90,9 @@ private class RelayByPortal(properties: Properties) : RelayHandler {
         relayedRequest.sendHead()
     }
 
-    override fun relayNonConnectRequest(request: HttpServerRequest, method: HttpMethod, uri: String) {
+    override fun relayNonConnectRequest(request: HttpServerRequest) {
         @Suppress("DEPRECATION")
-        val relayedRequest = client.requestAbs(method, url)
+        val relayedRequest = client.requestAbs(HttpMethod.OTHER, url).setRawMethod(PORTAL_RELAYED_REQUEST_METHOD)
             .exceptionHandler { onProxiedRequestException(request, it) }
             .handler { onProxiedRequestResponded(request, it) }
         setupHeaders(relayedRequest, request)
@@ -132,13 +132,13 @@ private class RelayByProxy(properties: Properties) : RelayHandler {
         client = vertx.createHttpClient(clientOptions)
     }
 
-    override fun relayConnectRequest(request: HttpServerRequest, uri: String) {
-        val parsedUri = URI("//$uri") // checked before
+    override fun relayConnectRequest(request: HttpServerRequest) {
+        val parsedUri = URI("//${request.uri()}") // checked before
         vertx.createNetClient(netClientOptionsOf(proxyOptions = proxyOptions))
             .connect(parsedUri.port, parsedUri.host) { onProxiedRequestConnected(request, it, asDirectProxy = true) }
     }
 
-    override fun relayNonConnectRequest(request: HttpServerRequest, method: HttpMethod, uri: String) {
+    override fun relayNonConnectRequest(request: HttpServerRequest) {
         @Suppress("DEPRECATION")
         val relayedRequest = client.requestAbs(request.method(), request.uri())
             .exceptionHandler { onProxiedRequestException(request, it) }

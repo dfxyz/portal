@@ -255,7 +255,7 @@ private fun proxyConnectRequest(request: HttpServerRequest, rawUri: String, asDi
     }
 
     if (asDirectProxy && cannotProxyDirectly(uri.host)) {
-        proxyRelayHandler.relayConnectRequest(request, rawUri)
+        proxyRelayHandler.relayConnectRequest(request)
         relayedAccess(request)
         return
     }
@@ -306,7 +306,7 @@ private fun proxyNonConnectRequest(
     }
 
     if (asDirectProxy && cannotProxyDirectly(url.host)) {
-        proxyRelayHandler.relayNonConnectRequest(request, method, uri)
+        proxyRelayHandler.relayNonConnectRequest(request)
         relayedAccess(request)
         return
     }
