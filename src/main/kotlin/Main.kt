@@ -35,7 +35,7 @@ fun getFile(relativePath: String) = File(homeDirectory, relativePath)
 private const val VERTX_ID_FILENAME = "portal.vertx.id"
 
 private fun loadVertxId(createIfNotExists: Boolean): String? {
-    val file = File(VERTX_ID_FILENAME)
+    val file = getFile(VERTX_ID_FILENAME)
     try {
         return file.readText()
     } catch (e: Exception) {
