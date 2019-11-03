@@ -106,7 +106,7 @@ var proxyMode = ProxyMode.RULE
 fun changeProxyMode(mode: ProxyMode) {
     if (proxyMode != mode) {
         val modeName = mode.name
-        info("proxy mode switched: modeName")
+        info("proxy mode switched: $modeName")
         proxyMode = mode
         proxyStatus.setProperty(PK_LAST_PROXY_MODE, modeName)
         saveProxyStatus()
