@@ -167,6 +167,8 @@ private fun initRelayedProxy(properties: Properties) {
     }
 }
 
+const val PORTAL_RELAYED_REQUEST_METHOD = "PORTAL"
+
 private fun handleRequest(request: HttpServerRequest) {
     val uri = request.uri()
     when {
@@ -177,7 +179,14 @@ private fun handleRequest(request: HttpServerRequest) {
         }
         uri.startsWith("/") -> when (request.method()) {
             HttpMethod.GET -> handleGetRequest(request)
-            HttpMethod.OTHER -> proxyRelayedRequest(request)
+            HttpMethod.OTHER -> {
+                if (request.rawMethod() != PORTAL_RELAYED_REQUEST_METHOD) {
+                    request.response().setStatus(HttpResponseStatus.METHOD_NOT_ALLOWED).endAndClose()
+                    deniedAccess(request)
+                    return
+                }
+                proxyRelayedRequest(request)
+            }
             else -> {
                 request.response().setStatus(HttpResponseStatus.METHOD_NOT_ALLOWED).endAndClose()
                 deniedAccess(request)
@@ -189,8 +198,6 @@ private fun handleRequest(request: HttpServerRequest) {
         }
     }
 }
-
-const val PORTAL_RELAYED_REQUEST_METHOD = "PORTAL"
 
 private fun proxyRelayedRequest(request: HttpServerRequest) {
     if (!relayedProxyEnabled || request.rawMethod() != PORTAL_RELAYED_REQUEST_METHOD) {
