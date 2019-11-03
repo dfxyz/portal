@@ -1,0 +1,5 @@
+proxy_http_version 1.1;
+proxy_pass http://localhost:4200/;
+proxy_set_header host $host;
+proxy_set_header connection keep-alive;
+proxy_set_header x-portal-real-ip $remote_addr;
