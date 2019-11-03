@@ -11,6 +11,7 @@ private const val PATH_WEB_RELAY_MODE = "/web/relayMode"
 private const val PATH_WEB_RULE_MODE = "/web/ruleMode"
 private const val PATH_WEB_UPDATE_LOCAL_RULES = "/web/updateLocalRules"
 private const val PATH_WEB_UPDATE_REMOTE_RULES = "/web/updateRemoteRules"
+private const val PATH_WEB_RELOAD = "/web/reload"
 private const val PATH_CMD_STATUS = "/cmd/status"
 private const val PATH_CMD_DIRECT_MODE = "/cmd/directMode"
 private const val PATH_CMD_RELAY_MODE = "/cmd/relayMode"
@@ -39,13 +40,14 @@ fun handleGetRequest(request: HttpServerRequest) {
         PATH_WEB_RULE_MODE -> changeProxyMode(request, ProxyMode.RULE)
         PATH_WEB_UPDATE_LOCAL_RULES -> updateLocalRules(request)
         PATH_WEB_UPDATE_REMOTE_RULES -> updateRemoteRules(request)
+        PATH_WEB_RELOAD -> reloadPortal(request)
         PATH_CMD_STATUS -> showServerStatus(request, false)
         PATH_CMD_DIRECT_MODE -> changeProxyMode(request, ProxyMode.DIRECT, false)
         PATH_CMD_RELAY_MODE -> changeProxyMode(request, ProxyMode.RELAY, false)
         PATH_CMD_RULE_MODE -> changeProxyMode(request, ProxyMode.RULE, false)
         PATH_CMD_UPDATE_LOCAL_RULES -> updateLocalRules(request, false)
         PATH_CMD_UPDATE_REMOTE_RULES -> updateRemoteRules(request, false)
-        PATH_CMD_RELOAD -> reloadPortal(request)
+        PATH_CMD_RELOAD -> reloadPortal(request, false)
         else -> request.response().setStatus(HttpResponseStatus.NOT_FOUND).endAndClose()
     }
 }
@@ -95,7 +97,7 @@ private fun showServerStatus(request: HttpServerRequest, returnHtml: Boolean = t
 
             appendString("<h2>Server Control</h2>")
             appendString("<ul>")
-            appendString("<li><a href=\"$PATH_CMD_RELOAD\">Reload</a></li>")
+            appendString("<li><a href=\"$PATH_WEB_RELOAD\">Reload</a></li>")
             appendString("</ul>")
         })
         return
@@ -158,7 +160,11 @@ private fun updateRemoteRules(request: HttpServerRequest, returnHtml: Boolean = 
     }
 }
 
-private fun reloadPortal(request: HttpServerRequest) {
-    request.response().endAndClose("OK\n")
+private fun reloadPortal(request: HttpServerRequest, returnHtml: Boolean = true) {
+    if (returnHtml) {
+        showMessageAndRedirect(request, "Reloading...")
+    } else {
+        request.response().endAndClose("OK\n")
+    }
     init()
 }

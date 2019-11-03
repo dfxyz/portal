@@ -2,7 +2,6 @@ package dfxyz.portal
 
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Launcher
-import io.vertx.core.Vertx
 import java.io.File
 import java.util.*
 
@@ -63,7 +62,13 @@ private fun loadVertxId(createIfNotExists: Boolean): String? {
 
 private fun start() {
     val vertxId = loadVertxId(true) ?: return
-    Launcher.main(arrayOf("start", PortalVerticle::class.java.name, "-id", vertxId))
+    Launcher.main(
+        arrayOf(
+            "start", PortalVerticle::class.java.name,
+            "-id", vertxId,
+            "--java-opts=-D$PK_PORTAL_HOME=${homeDirectory.absolutePath}"
+        )
+    )
 }
 
 private fun stop() {
@@ -76,7 +81,7 @@ private fun list() {
 }
 
 private fun run() {
-    Vertx.vertx().deployVerticle(PortalVerticle())
+    Launcher.main(arrayOf("run", PortalVerticle::class.java.name))
 }
 
 private fun help() {
