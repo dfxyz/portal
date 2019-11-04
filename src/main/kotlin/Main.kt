@@ -65,7 +65,7 @@ private fun start() {
     val vertxId = loadVertxId(true) ?: return
     Launcher.main(
         arrayOf(
-            "start", "dfxyz.portal",
+            "start",
             "-id", vertxId,
             "--java-opts=-D$PK_PORTAL_HOME=${homeDirectory.absolutePath}"
         )
