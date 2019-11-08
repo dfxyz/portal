@@ -6,15 +6,16 @@ plugins {
 }
 
 group = "dfxyz"
-version = "0.1.1"
+version = "0.1.2-SNAPSHOT"
 
 application {
     mainClassName = "dfxyz.portal.MainKt"
-    applicationDefaultJvmArgs = listOf("-Dportal.home=PORTAL_HOME")
+    applicationDefaultJvmArgs = listOf("-Djava.net.preferIPv4Stack=true")
 }
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -23,6 +24,7 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin:3.8.3")
     implementation("org.apache.logging.log4j:log4j-core:2.12.1")
     implementation("org.apache.logging.log4j:log4j-api:2.12.1")
+    implementation("com.github.dfxyz:main-wrapper:0.1")
 }
 
 tasks.withType<KotlinCompile> {
@@ -31,8 +33,15 @@ tasks.withType<KotlinCompile> {
 
 tasks.getByName<CreateStartScripts>("startScripts") {
     doLast {
-        unixScript.writeText(unixScript.readText().replace("PORTAL_HOME", "\$APP_HOME"))
-        windowsScript.writeText(windowsScript.readText().replace("PORTAL_HOME", "%APP_HOME%"))
+        unixScript.readText().replace("cd \"\$SAVED\" >/dev/null\n", "").also {
+            unixScript.writeText(it)
+        }
+        windowsScript.readText().replace(
+            "set APP_HOME=%DIRNAME%..\r\n",
+            "set APP_HOME=%DIRNAME%..\r\ncd /d %APP_HOME%\r\n"
+        ).also {
+            windowsScript.writeText(it)
+        }
     }
 }
 
