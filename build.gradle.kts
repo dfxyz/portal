@@ -10,7 +10,7 @@ version = "0.1.2-SNAPSHOT"
 
 application {
     mainClassName = "dfxyz.portal.PortalKt"
-    applicationDefaultJvmArgs = listOf("-Djava.net.preferIPv4Stack=true", "-Dfile.encoding=utf-8")
+    applicationDefaultJvmArgs = listOf("-Dfile.encoding=utf-8")
 }
 
 repositories {
