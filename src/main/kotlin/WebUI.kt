@@ -174,5 +174,5 @@ private fun reloadPortal(request: HttpServerRequest, returnHtml: Boolean = true)
     } else {
         request.response().endAndClose("OK\n")
     }
-    dfxyz.portal.init()
+    init()
 }
