@@ -1,8 +1,13 @@
-package dfxyz.portal
+package dfxyz.portal.webui
 
+import dfxyz.portal.*
+import dfxyz.portal.logger.*
+import dfxyz.portal.proxyrule.*
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpServerRequest
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 
 private const val PATH_ROOT = "/"
 private const val PATH_WEB_ROOT = "/web/"
@@ -20,7 +25,7 @@ private const val PATH_CMD_UPDATE_LOCAL_RULES = "/cmd/updateLocalRules"
 private const val PATH_CMD_UPDATE_REMOTE_RULES = "/cmd/updateRemoteRules"
 private const val PATH_CMD_RELOAD = "/cmd/reload"
 
-fun handleGetRequest(request: HttpServerRequest) {
+fun handleRequest(request: HttpServerRequest) {
     if (!directProxyEnabled || request.remoteAddress().host() != "127.0.0.1") {
         request.response().setStatus(HttpResponseStatus.NOT_FOUND).endAndClose()
         deniedAccess(request)
@@ -131,11 +136,13 @@ private fun showMessageAndRedirect(request: HttpServerRequest, message: String, 
 }
 
 private fun updateLocalRules(request: HttpServerRequest, returnHtml: Boolean = true) {
-    updateLocalRules(vertx) { success: Boolean ->
+    updateLocalRules {
+        val success = it.succeeded()
         if (returnHtml) {
             val message = if (success) {
                 "Local rules updated. (Black: ${getLocalRuleBlackListSize()}; White: ${getLocalRuleWhiteListSize()})"
             } else {
+                it.cause().printStackTrace(PrintStream(ByteArrayOutputStream()))
                 "Failed to update local rules."
             }
             showMessageAndRedirect(request, message)
@@ -146,7 +153,8 @@ private fun updateLocalRules(request: HttpServerRequest, returnHtml: Boolean = t
 }
 
 private fun updateRemoteRules(request: HttpServerRequest, returnHtml: Boolean = true) {
-    updateRemoteRules(vertx) { success: Boolean ->
+    updateRemoteRules {
+        val success = it.succeeded() && it.result()
         if (returnHtml) {
             val message = if (success) {
                 "Remote rules updated. (Black: ${getRemoteRuleBlackListSize()}; White: ${getRemoteRuleWhiteListSize()})"
@@ -166,5 +174,5 @@ private fun reloadPortal(request: HttpServerRequest, returnHtml: Boolean = true)
     } else {
         request.response().endAndClose("OK\n")
     }
-    init()
+    dfxyz.portal.init()
 }
