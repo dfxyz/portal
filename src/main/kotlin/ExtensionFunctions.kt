@@ -12,6 +12,20 @@ private const val HEADER_RELAYED_METHOD = "x-portal-method"
 private const val HEADER_RELAYED_URI = "x-portal-uri"
 private const val HEADER_PORTAL_AUTH = "x-portal-auth"
 
+private val IGNORED_HEADER_PREFIXES = listOf("proxy-", "x-portal-")
+
+fun Properties.getString(key: String): String {
+    return this.getProperty(key) ?: throw RuntimeException("failed to load property '$key'")
+}
+
+fun Properties.getInt(key: String): Int {
+    return this.getProperty(key)?.toIntOrNull() ?: throw RuntimeException("failed to load property '$key'")
+}
+
+fun Properties.getStringList(key: String): List<String> {
+    return this.getProperty(key)?.split(',') ?: emptyList()
+}
+
 fun HttpServerRequest.getRelayedRealIp(): String? {
     return this.getHeader(HEADER_RELAYED_REAL_IP)
 }
@@ -57,12 +71,10 @@ fun HttpServerResponse.endAndClose(message: String) {
     this.putHeader("connection", "close").endHandler { this.close() }.end(message)
 }
 
-private val ignoredHeaderPrefixes = listOf("proxy-", "x-portal-")
-
 fun HttpClientRequest.copyHeaders(other: HttpServerRequest) {
     headerLoop@ for (header in other.headers()) {
         val key = header.key.toLowerCase()
-        for (prefix in ignoredHeaderPrefixes) {
+        for (prefix in IGNORED_HEADER_PREFIXES) {
             if (key.startsWith(prefix)) {
                 continue@headerLoop
             }
@@ -81,16 +93,4 @@ fun HttpClientRequest.setRelayedUri(uri: String): HttpClientRequest {
 
 fun HttpClientRequest.setPortalAuth(auth: String): HttpClientRequest {
     return this.putHeader(HEADER_PORTAL_AUTH, auth)
-}
-
-fun Properties.getString(key: String): String {
-    return this.getProperty(key) ?: throw RuntimeException("failed to load property '$key'")
-}
-
-fun Properties.getInt(key: String): Int {
-    return this.getProperty(key)?.toIntOrNull() ?: throw RuntimeException("failed to load property '$key'")
-}
-
-fun Properties.getStringList(key: String): List<String> {
-    return this.getProperty(key)?.split(',') ?: emptyList()
 }
