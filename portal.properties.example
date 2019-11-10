@@ -1,6 +1,6 @@
 #portal.server.host=localhost
 #portal.server.port=4200
-#portal.client.maxPoolSize=64
+#portal.client.maxPoolSize=8
 
 #portal.directProxy.enable=true
 #portal.directProxy.remoteRule.b64Encoded=true
@@ -10,14 +10,14 @@
 
 #portal.directProxy.relay.portal.url=https://remotehost/
 #portal.directProxy.relay.portal.auth=the-cake-is-a-lie
-#portal.directProxy.relay.portal.client.maxPoolSize=512
+#portal.directProxy.relay.portal.client.maxPoolSize=1024
 
 #portal.directProxy.relay.proxy.protocol=[http|socks4|socks5]
 #portal.directProxy.relay.proxy.host=localhost
 #portal.directProxy.relay.proxy.port=1080
 #portal.directProxy.relay.proxy.username=
 #portal.directProxy.relay.proxy.password=
-#portal.directProxy.relay.proxy.client.maxPoolSize=512
+#portal.directProxy.relay.proxy.client.maxPoolSize=8
 
 #portal.relayedProxy.enable=true
 #portal.relayedProxy.auth=the-cake-is-a-lie
