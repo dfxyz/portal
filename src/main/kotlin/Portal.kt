@@ -21,6 +21,9 @@ import java.net.URL
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+private const val PK_LOG4J_CONFIG_PATH = "log4j.configurationFile"
+private const val LOG4J_CONFIG_FILENAME = "portal.log4j2.xml"
+
 private const val PROCESS_UUID_FILENAME = "portal.process.uuid"
 
 private const val PROPERTIES_FILENAME = "portal.properties"
@@ -44,7 +47,10 @@ private const val RAW_101_RESPONSE = "HTTP/1.1 101 OK\r\n\r\n"
 
 enum class ProxyMode { DIRECT, RELAY, RULE }
 
-val vertx: Vertx = Vertx.vertx()
+val vertx: Vertx = run {
+    System.setProperty(PK_LOG4J_CONFIG_PATH, LOG4J_CONFIG_FILENAME)
+    return@run Vertx.vertx()
+}
 
 private lateinit var httpServer: HttpServer
 lateinit var httpClient: HttpClient; private set
@@ -60,9 +66,7 @@ fun main(args: Array<String>) = Main().invoke(args)
 
 private class Main : AbstractMainWrapper() {
     override fun processUuidFilename(): String = PROCESS_UUID_FILENAME
-    override fun mainFunction(args: Array<out String>?) {
-        vertx.deployVerticle(PortalVerticle())
-    }
+    override fun mainFunction(args: Array<out String>?) = vertx.deployVerticle(PortalVerticle())
 }
 
 private class PortalVerticle : AbstractVerticle() {
@@ -70,9 +74,7 @@ private class PortalVerticle : AbstractVerticle() {
 }
 
 fun init(firstTime: Boolean = false) {
-    if (firstTime) {
-        dfxyz.portal.logger.init()
-    } else {
+    if (!firstTime) {
         httpServer.close()
         httpClient.close()
     }
