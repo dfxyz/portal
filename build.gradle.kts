@@ -9,8 +9,8 @@ group = "dfxyz"
 version = "0.1.2-SNAPSHOT"
 
 application {
-    mainClassName = "dfxyz.portal.MainKt"
-    applicationDefaultJvmArgs = listOf("-Djava.net.preferIPv4Stack=true")
+    mainClassName = "dfxyz.portal.PortalKt"
+    applicationDefaultJvmArgs = listOf("-Djava.net.preferIPv4Stack=true", "-Dfile.encoding=utf-8")
 }
 
 repositories {
