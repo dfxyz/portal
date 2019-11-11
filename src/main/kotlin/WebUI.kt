@@ -1,13 +1,14 @@
 package dfxyz.portal.webui
 
 import dfxyz.portal.*
-import dfxyz.portal.logger.*
+import dfxyz.portal.logger.deniedAccess
 import dfxyz.portal.proxyrule.*
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpServerRequest
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
+import java.net.InetAddress
 
 private const val PATH_ROOT = "/"
 private const val PATH_WEB_ROOT = "/web/"
@@ -26,7 +27,7 @@ private const val PATH_CMD_UPDATE_REMOTE_RULES = "/cmd/updateRemoteRules"
 private const val PATH_CMD_RELOAD = "/cmd/reload"
 
 fun handleRequest(request: HttpServerRequest) {
-    if (!directProxyEnabled || request.remoteAddress().host() != "127.0.0.1") {
+    if (!directProxyEnabled || !InetAddress.getByName(request.remoteAddress().host()).isLoopbackAddress) {
         request.response().setStatus(HttpResponseStatus.NOT_FOUND).endAndClose()
         deniedAccess(request)
         return
