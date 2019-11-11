@@ -137,7 +137,7 @@ private fun showMessageAndRedirect(request: HttpServerRequest, message: String, 
 }
 
 private fun updateLocalRules(request: HttpServerRequest, returnHtml: Boolean = true) {
-    updateLocalRules {
+    updateLocalRules().setHandler {
         val success = it.succeeded()
         if (returnHtml) {
             val message = if (success) {
@@ -154,7 +154,7 @@ private fun updateLocalRules(request: HttpServerRequest, returnHtml: Boolean = t
 }
 
 private fun updateRemoteRules(request: HttpServerRequest, returnHtml: Boolean = true) {
-    updateRemoteRules {
+    updateRemoteRules().setHandler {
         val success = it.succeeded() && it.result()
         if (returnHtml) {
             val message = if (success) {

@@ -148,87 +148,83 @@ fun getLocalRuleBlackListSize() = localRules.blackHosts.size
 fun getRemoteRuleWhiteListSize() = remoteRules.whiteHosts.size
 fun getRemoteRuleBlackListSize() = remoteRules.blackHosts.size
 
-fun updateLocalRules(handler: ((AsyncResult<Unit>) -> Unit)) {
-    Future.future<Unit> { promise ->
-        val path = localRules.filename
-        vertx.fileSystem().exists(path) {
-            if (it.failed()) {
-                error("failed to check local rules", it.cause())
-                promise.fail(it.cause())
-                return@exists
-            }
+fun updateLocalRules() = Future.future<Unit> { promise ->
+    val path = localRules.filename
+    vertx.fileSystem().exists(path) {
+        if (it.failed()) {
+            error("failed to check local rules", it.cause())
+            promise.fail(it.cause())
+            return@exists
+        }
 
-            if (it.result()) {
-                vertx.fileSystem().readFile(path) { readResult ->
-                    if (readResult.failed()) {
-                        error("failed to read local rules", readResult.cause())
-                        promise.fail(readResult.cause())
-                        return@readFile
-                    }
-                    localRules.load(readResult.result().bytes.inputStream().bufferedReader().readLines())
-                    info("local rules updated")
-                    promise.complete()
+        if (it.result()) {
+            vertx.fileSystem().readFile(path) { readResult ->
+                if (readResult.failed()) {
+                    error("failed to read local rules", readResult.cause())
+                    promise.fail(readResult.cause())
+                    return@readFile
                 }
-                return@exists
-            }
-
-            vertx.fileSystem().createFile(path) { createResult ->
-                if (createResult.failed()) {
-                    error("failed to create local rules", createResult.cause())
-                    promise.fail(createResult.cause())
-                    return@createFile
-                }
-                info("local rules created")
+                localRules.load(readResult.result().bytes.inputStream().bufferedReader().readLines())
+                info("local rules updated")
                 promise.complete()
             }
+            return@exists
         }
-    }.setHandler(handler)
+
+        vertx.fileSystem().createFile(path) { createResult ->
+            if (createResult.failed()) {
+                error("failed to create local rules", createResult.cause())
+                promise.fail(createResult.cause())
+                return@createFile
+            }
+            info("local rules created")
+            promise.complete()
+        }
+    }
 }
 
-fun updateRemoteRules(handler: ((AsyncResult<Boolean>) -> Unit) = {}) {
-    Future.future<Boolean> { promise ->
-        if (remoteRuleUrls.isEmpty()) {
-            error("property '$PK_REMOTE_RULE_URL' not set")
+fun updateRemoteRules() = Future.future<Boolean> { promise ->
+    if (remoteRuleUrls.isEmpty()) {
+        error("property '$PK_REMOTE_RULE_URL' not set")
+        promise.complete(false)
+        return@future
+    }
+
+    val url = remoteRuleUrls.random()
+
+    @Suppress("DEPRECATION")
+    httpClient.getAbs(url).exceptionHandler {
+        error("exception caught when updating remote rules", it)
+        promise.fail(it)
+    }.handler { response ->
+        val statusCode = response.statusCode()
+        if (statusCode != HttpResponseStatus.OK.code()) {
+            error("received $statusCode when updating remote rules: $url")
             promise.complete(false)
-            return@future
+            return@handler
         }
-
-        val url = remoteRuleUrls.random()
-
-        @Suppress("DEPRECATION")
-        httpClient.getAbs(url).exceptionHandler {
-            error("exception caught when updating remote rules", it)
+        response.exceptionHandler {
+            error("exception caught when receiving remote rules", it)
             promise.fail(it)
-        }.handler { response ->
-            val statusCode = response.statusCode()
-            if (statusCode != HttpResponseStatus.OK.code()) {
-                error("received $statusCode when updating remote rules: $url")
-                promise.complete(false)
-                return@handler
+        }.bodyHandler { buffer ->
+            val rawBytes = if (remoteRuleB64Encoded) {
+                Base64.getMimeDecoder().decode(buffer.bytes)
+            } else {
+                buffer.bytes
             }
-            response.exceptionHandler {
-                error("exception caught when receiving remote rules", it)
-                promise.fail(it)
-            }.bodyHandler { buffer ->
-                val rawBytes = if (remoteRuleB64Encoded) {
-                    Base64.getMimeDecoder().decode(buffer.bytes)
+
+            vertx.fileSystem().writeFile(remoteRules.filename, Buffer.buffer(rawBytes)) {
+                if (it.failed()) {
+                    error("failed to save remote rules")
                 } else {
-                    buffer.bytes
+                    updateRemoteRuleUpdateTime()
+                    info("remote rules saved")
                 }
-
-                vertx.fileSystem().writeFile(remoteRules.filename, Buffer.buffer(rawBytes)) {
-                    if (it.failed()) {
-                        error("failed to save remote rules")
-                    } else {
-                        updateRemoteRuleUpdateTime()
-                        info("remote rules saved")
-                    }
-                }
-
-                remoteRules.load(rawBytes.inputStream().bufferedReader().readLines())
-                info("remote rules updated")
-                promise.complete(true)
             }
-        }.end()
-    }.setHandler(handler)
+
+            remoteRules.load(rawBytes.inputStream().bufferedReader().readLines())
+            info("remote rules updated")
+            promise.complete(true)
+        }
+    }.end()
 }
