@@ -1,2 +1,3 @@
 rootProject.name = "portal"
-include("core", "web")
+include("portal-core")
+include("portal-web")

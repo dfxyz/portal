@@ -1,3 +1,5 @@
+version = "0.1-SNAPSHOT"
+
 plugins {
     kotlin("js") version "1.3.50"
 }
