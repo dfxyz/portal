@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile
 version = "0.1-SNAPSHOT"
 
 plugins {
-    kotlin("js") version "1.3.50"
+    kotlin("js") version "1.3.61"
 }
 
 repositories {
