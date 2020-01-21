@@ -20,17 +20,27 @@ val compileTask = tasks.getByName<Kotlin2JsCompile>("compileKotlinJs").apply {
     kotlinOptions.outputFile = "${destinationDir}/portal.js"
 }
 
-val resourceTask = tasks.getByName<ProcessResources>("processResources")
+val processedResourceDir = "$buildDir/resources"
+
+val resourceTask = tasks.replace("processResources", Sync::class.java).apply {
+    dependsOn(compileTask)
+    for (file in configurations.compileClasspath.get()) {
+        from(zipTree(file)) { include { it.name == "kotlin.js" } }
+    }
+    from(compileTask.outputFile)
+    from(kotlin.sourceSets["main"].resources)
+    into("$processedResourceDir/dfxyz/portal/web")
+}
 
 tasks.register<Jar>("jar") {
-    dependsOn(compileTask, resourceTask)
-    val packagePath = "dfxyz/portal/web"
-    for (file in configurations.compileClasspath.get()) {
-        from(zipTree(file)) {
-            include { it.name == "kotlin.js" }
-            into(packagePath)
-        }
+    group = "build"
+    dependsOn(resourceTask)
+    from(processedResourceDir)
+}
+
+listOf("JsJar", "JsSourcesJar", "kotlinSourcesJar").forEach { name ->
+    tasks[name].also {
+        it.onlyIf { false }
+        tasks.remove(it)
     }
-    from(compileTask.outputFile) { into(packagePath) }
-    from(resourceTask.source) { into(packagePath) }
 }
