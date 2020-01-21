@@ -1,5 +1,5 @@
 @Suppress("PropertyName")
-val MAIN_CLASS_NAME = "dfxyz.portal.PortalKt"
+val MAIN_CLASS_NAME = "dfxyz.portal.Main"
 
 val coreRuntimeClasspath by lazy {
     project(":portal-core")
@@ -7,8 +7,9 @@ val coreRuntimeClasspath by lazy {
         .sourceSets[SourceSet.MAIN_SOURCE_SET_NAME]
         .runtimeClasspath
 }
-val coreCompileTask = tasks.getByPath(":portal-core:mainClasses")
 val coreJarTask = tasks.getByPath(":portal-core:jar") as Jar
+
+val webRuntimePath = "${project(":portal-web").buildDir}/resources"
 val webJarTask = tasks.getByPath(":portal-web:jar") as Jar
 
 inline fun <reified T : Task> registerTask(name: String, noinline block: T.() -> Unit): TaskProvider<T> {
@@ -19,13 +20,10 @@ inline fun <reified T : Task> registerTask(name: String, noinline block: T.() ->
 }
 
 registerTask<JavaExec>("run") {
-    dependsOn(coreCompileTask, webJarTask)
+    dependsOn(":portal-core:mainClasses", ":portal-web:mainClasses")
     main = MAIN_CLASS_NAME
     args = listOf("run")
-    classpath = files(
-        coreRuntimeClasspath,
-        webJarTask.archiveFile
-    )
+    classpath = files(coreRuntimeClasspath, webRuntimePath)
 }
 
 val collectDependenciesTask = registerTask<Sync>("collectDependencies") {
