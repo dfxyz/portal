@@ -20,8 +20,8 @@ val compileTask = tasks.getByName<Kotlin2JsCompile>("compileKotlinJs").apply {
     kotlinOptions.outputFile = "${destinationDir}/portal.js"
 }
 
-val processedResourceDir = "$buildDir/resources"
-
+val processedResourceRootPath = "$buildDir/resources"
+val processedResourceContentPath = "$processedResourceRootPath/dfxyz/portal/web"
 val resourceTask = tasks.replace("processResources", Sync::class.java).apply {
     dependsOn(compileTask)
     for (file in configurations.compileClasspath.get()) {
@@ -29,13 +29,33 @@ val resourceTask = tasks.replace("processResources", Sync::class.java).apply {
     }
     from(compileTask.outputFile)
     from(kotlin.sourceSets["main"].resources)
-    into("$processedResourceDir/dfxyz/portal/web")
+    into(processedResourceContentPath)
+    doLast {
+        File("$processedResourceContentPath/.file_list").bufferedWriter().use {
+            recordResources(it, File(processedResourceContentPath), firstCall = true)
+        }
+    }
+}
+
+fun recordResources(writer: java.io.BufferedWriter, file: File, prefix: String = "", firstCall: Boolean = false) {
+    val filename = file.name
+    if (filename.startsWith(".")) return
+
+    val path = prefix + filename
+    if (file.isFile) {
+        writer.appendln(path)
+    } else if (file.isDirectory) {
+        val newPrefix = if (firstCall) "" else "$path/"
+        file.listFiles()?.forEach {
+            recordResources(writer, it, newPrefix)
+        }
+    }
 }
 
 tasks.register<Jar>("jar") {
     group = "build"
     dependsOn(resourceTask)
-    from(processedResourceDir)
+    from(processedResourceRootPath)
 }
 
 listOf("JsJar", "JsSourcesJar", "kotlinSourcesJar").forEach { name ->
