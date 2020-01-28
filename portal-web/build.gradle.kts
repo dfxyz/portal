@@ -37,7 +37,7 @@ val resourceTask = tasks.replace("processResources", Sync::class.java).apply {
     }
 }
 
-fun recordResources(writer: java.io.BufferedWriter, file: File, prefix: String = "", firstCall: Boolean = false) {
+fun recordResources(writer: java.io.BufferedWriter, file: File, prefix: String = "/", firstCall: Boolean = false) {
     val filename = file.name
     if (filename.startsWith(".")) return
 
@@ -45,7 +45,7 @@ fun recordResources(writer: java.io.BufferedWriter, file: File, prefix: String =
     if (file.isFile) {
         writer.appendln(path)
     } else if (file.isDirectory) {
-        val newPrefix = if (firstCall) "" else "$path/"
+        val newPrefix = if (firstCall) prefix else "$path/"
         file.listFiles()?.forEach {
             recordResources(writer, it, newPrefix)
         }
