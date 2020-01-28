@@ -13,8 +13,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation("io.vertx:vertx-core:3.8.4")
-    implementation("io.vertx:vertx-lang-kotlin:3.8.4")
+    implementation("io.vertx:vertx-core:3.8.5")
+    implementation("io.vertx:vertx-lang-kotlin:3.8.5")
     implementation("org.apache.logging.log4j:log4j-core:2.12.1")
     implementation("org.apache.logging.log4j:log4j-api:2.12.1")
     implementation("com.github.dfxyz:main-wrapper:0.1")
