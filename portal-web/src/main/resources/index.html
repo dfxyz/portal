@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Portal</title>
+    <script type="application/javascript" src="kotlin.js"></script>
+    <script type="application/javascript" src="portal.js"></script>
+    <style>
+    body { margin-left: 25%; margin-right: 25%; }
+    </style>
+</head>
+<body>
+<h1>Portal</h1>
+<hr/>
+<h2>Proxy Mode</h2>
+<ul>
+    <li><a id="directModeAnchor">DIRECT</a></li>
+    <li><a id="relayModeAnchor">RELAY</a></li>
+    <li><a id="ruleModeAnchor">RULE</a></li>
+</ul>
+<h2>Proxy Rules</h2>
+<p>Local Rules: (<a id="updateLocalRuleAnchor" href="#">Update</a>)</p>
+<ul>
+    <li>Black Rule Number: <span id="localBlackRuleNumberSpan">0</span></li>
+    <li>White Rule Number: <span id="localWhiteRuleNumberSpan">0</span></li>
+</ul>
+<p>Local Rules: (<a id="updateRemoteRuleAnchor" href="#">Update</a>)</p>
+<ul>
+    <li>Black Rule Number: <span id="remoteBlackRuleNumberSpan">0</span></li>
+    <li>White Rule Number: <span id="remoteWhiteRuleNumberSpan">0</span></li>
+</ul>
+<p>Test Host:</p>
+<input id="testHostText" type="text"/>
+<input id="testHostSubmit" type="submit" value="Test"/>
+<div id="testResultDivision" style="display: none">
+    <p>Previous Test Result:</p>
+    <p><span id="testedHostSpan"></span> - <b><span id="testedResultSpan"></span></b></p>
+</div>
+<h2>Server Control:</h2>
+<p><a id="reloadConfigurationAnchor" href="#">Reload Configurations</a></p>
+</body>
+</html>
