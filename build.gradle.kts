@@ -22,6 +22,7 @@ inline fun <reified T : Task> registerTask(name: String, noinline block: T.() ->
 registerTask<JavaExec>("run") {
     dependsOn(":portal-core:mainClasses", ":portal-web:mainClasses")
     main = MAIN_CLASS_NAME
+    jvmArgs = listOf("-Dfile.encoding=UTF-8")
     args = listOf("run")
     classpath = files(coreRuntimeClasspath, webRuntimePath)
 }
@@ -37,7 +38,8 @@ val collectDependenciesTask = registerTask<Sync>("collectDependencies") {
 val createStartScriptsTask = registerTask<CreateStartScripts>("createStartScripts") {
     applicationName = project.name
     mainClassName = MAIN_CLASS_NAME
-    classpath = files(file("lib").listFiles() ?: emptyArray<File>())
+    defaultJvmOpts = listOf("-Dfile.encoding=UTF-8")
+    classpath = collectDependenciesTask.get().source
     outputDir = file("bin")
     doLast {
         unixScript.readText().replace("cd \"\$SAVED\" >/dev/null\n", "").also {
