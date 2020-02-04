@@ -53,10 +53,6 @@ private lateinit var testedResultSpan: HTMLSpanElement
 private lateinit var reloadConfigurationAnchor: HTMLAnchorElement
 
 fun main() {
-    window.onload = { init() }
-}
-
-private fun init() {
     directModeAnchor = ProxyModeAnchor(
         ProxyMode.DIRECT,
         document.getElementById("directModeAnchor") as HTMLAnchorElement
