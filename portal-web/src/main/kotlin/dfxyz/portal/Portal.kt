@@ -13,7 +13,7 @@ import kotlin.js.Json
 
 private const val STATUS_OK = 200.toShort()
 
-private val urlRoot = document.URL.trimEnd('/', '#')
+private val urlRoot = document.URL.trimEnd('/')
 
 private enum class ProxyMode { DIRECT, RELAY, RULE }
 
@@ -26,7 +26,7 @@ private class ProxyModeAnchor(
     private val element: HTMLAnchorElement
 ) {
     fun enable() {
-        element.href = "#"
+        element.href = "javascript:;"
         element.onclick = { requestSetProxyMode(proxyMode) }
     }
 
