@@ -1,6 +1,3 @@
-.*/
-bin/
-build/
-lib/
-/portal.*
-!*.example
+/.idea/
+/target/
+/Cargo.lock
