@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package portal;
+
+message ControlRequest {
+  oneof content {
+    uint32 shutdown = 1;
+  }
+}
+
+message ControlResponse {
+  oneof content {
+    uint32 shutdown = 1;
+  }
+}
